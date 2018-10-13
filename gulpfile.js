@@ -130,8 +130,8 @@ gulp.task("build", function(fn) {
         "copy",
         "image",
         "style",
-        "html",,
-        "php"
+        "html",
+        "php",
         "js",
         fn
     );
