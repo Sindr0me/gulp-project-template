@@ -23,7 +23,7 @@ var path = {
         fonts: 'build/src/fonts'
     },
     src: { //Пути откуда брать исходники
-        html: './*.html',
+        html: './*.{html,php}',
         js: './src/js/**/*.*',
         styles: './src/css/*.{scss,sass}',
         img: './src/img/**/*.*',
@@ -86,6 +86,12 @@ gulp.task('html', function () {
         .pipe(server.stream());
 });
 
+gulp.task('php', function () {
+    gulp.src(path.src.html)
+        .pipe(gulp.dest(path.build.html))
+        .pipe(server.stream());
+});
+
 //запуск сервера
 gulp.task("serve", function() {
     server.init({
@@ -124,7 +130,8 @@ gulp.task("build", function(fn) {
         "copy",
         "image",
         "style",
-        "html",
+        "html",,
+        "php"
         "js",
         fn
     );

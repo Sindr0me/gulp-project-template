@@ -4,8 +4,13 @@
   "description": "my test gulp project",
   "author": "vk",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "vue": "^2.5.17"
+  },
   "devDependencies": {
+    "vue": "^2.5.17",
+    "jquery": "^3.3.1",
     "browser-sync": "^2.24.6",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
