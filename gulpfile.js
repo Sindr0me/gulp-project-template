@@ -12,6 +12,7 @@ var gulp = require("gulp"),
     csso = require('gulp-csso'),
     del = require("del"),
     runSequence = require('run-sequence'),
+    babel = require('gulp-babel');
     server = require("browser-sync").create();
 
 var path = {
@@ -25,6 +26,7 @@ var path = {
     src: { //Пути откуда брать исходники
         html: './*.{html,php}',
         js: './src/js/**/*.*',
+        jsbabel: './src/forbabel/**/*.*',
         styles: './src/css/*.{scss,sass}',
         img: './src/img/**/*.*',
         fonts: './src/fonts/**/*.*'
@@ -41,10 +43,10 @@ gulp.task("style", function() {
         .pipe(postcss([
             autoprefixer({browsers: [
                 "last 10 version",
-                "last 2 Chrome versions",
-                "last 2 Firefox versions",
-                "last 2 Opera versions",
-                "last 2 Edge versions"
+                "last 6 Chrome versions",
+                "last 6 Firefox versions",
+                "last 6 Opera versions",
+                "last 6 Edge versions"
             ]})
         ]))
         .pipe(csso({
@@ -66,6 +68,15 @@ gulp.task('js', function () {
         .pipe(rename({suffix: '.min'})) //добавим суффикс .min к выходному файлу
         .pipe(gulp.dest(path.build.js)) //выгрузим готовый файл в build
         .pipe(server.stream()); //И перезагрузим сервер
+});
+
+gulp.task('babel', function () {
+    gulp.src('src/forbabel/**/*.*')
+        .pipe(babel({
+            presets: ['@babel/env']
+        }))
+        .pipe(gulp.dest('src/js/'))
+        .pipe(server.stream());
 });
 
 gulp.task('image', function () {
@@ -99,9 +110,11 @@ gulp.task("serve", function() {
     });
 
     //вотчеры
+    gulp.watch(path.src.jsbabel, ["babel"]);
     gulp.watch(path.src.js, ["js"]);
     gulp.watch(path.src.styles, ["style"]);
     gulp.watch('*.html', ['html']);
+    gulp.watch('*.php', ['php']);
 
 });
 
@@ -131,6 +144,7 @@ gulp.task("build", function(fn) {
         "image",
         "style",
         "html",
+        "babel",
         "php",
         "js",
         fn
