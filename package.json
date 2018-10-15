@@ -9,12 +9,15 @@
     "vue": "^2.5.17"
   },
   "devDependencies": {
-    "vue": "^2.5.17",
     "jquery": "^3.3.1",
+    "vue": "^2.5.17",
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
     "browser-sync": "^2.24.6",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^5.0.0",
+    "gulp-babel": "^8.0.0",
     "gulp-csso": "^3.0.1",
     "gulp-imagemin": "^4.1.0",
     "gulp-jshint": "^2.1.0",
