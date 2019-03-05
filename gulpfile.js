@@ -15,6 +15,7 @@ var gulp = require("gulp"),
     babel = require('gulp-babel');
     server = require("browser-sync").create();
 
+//директории
 var path = {
     build: { //готовые после сборки файлы
         html: './build',
@@ -24,7 +25,7 @@ var path = {
         fonts: 'build/src/fonts'
     },
     src: { //Пути откуда брать исходники
-        html: './*.{html,php}',
+        html: './*.html',
         js: './src/js/**/*.*',
         jsbabel: './src/forbabel/**/*.*',
         styles: './src/css/*.{scss,sass}',
@@ -38,7 +39,6 @@ var path = {
 //ТАСКИ
 gulp.task("style", function() {
     gulp.src(path.src.styles)
-        .pipe(plumber())
         .pipe(sass())
         .pipe(postcss([
             autoprefixer({browsers: [
@@ -49,19 +49,20 @@ gulp.task("style", function() {
                 "last 6 Edge versions"
             ]})
         ]))
-        .pipe(csso({
-            restructure: true,
-            sourceMap: true,
-            debug: true
-        }))
+        .pipe(sourcemaps.init()) //Инициализируем sourcemap
+        .pipe(csso())
         .pipe(sourcemaps.write('.'))
-        .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest(path.build.css))
+        // .pipe(rename({suffix: '.min'}))
         .pipe(server.stream());
 });
 
 gulp.task('js', function () {
     gulp.src(path.src.js)
+        .pipe(babel({ //babel для ES
+            presets: ['@babel/env']
+        }))
+        .pipe(plumber())
         .pipe(sourcemaps.init()) //Инициализируем sourcemap
         .pipe(uglify()) //Сожмем наш js
         .pipe(sourcemaps.write()) //Пропишем карты
@@ -70,23 +71,9 @@ gulp.task('js', function () {
         .pipe(server.stream()); //И перезагрузим сервер
 });
 
-gulp.task('babel', function () {
-    gulp.src('src/forbabel/**/*.*')
-        .pipe(babel({
-            presets: ['@babel/env']
-        }))
-        .pipe(gulp.dest('src/js/'))
-        .pipe(server.stream());
-});
-
 gulp.task('image', function () {
     gulp.src(path.src.img)
-        .pipe(imagemin({
-            progressive: true, //сжатие .jpg
-            svgoPlugins: [{removeViewBox: false}], //сжатие .svg
-            interlaced: true, //сжатие .gif
-            optimizationLevel: 7 //степень сжатия от 0 до 7
-        }))
+        .pipe(imagemin())
         .pipe(gulp.dest(path.build.img))
         .pipe(server.stream())
 });
@@ -95,27 +82,6 @@ gulp.task('html', function () {
     gulp.src(path.src.html)
         .pipe(gulp.dest(path.build.html))
         .pipe(server.stream());
-});
-
-gulp.task('php', function () {
-    gulp.src(path.src.html)
-        .pipe(gulp.dest(path.build.html))
-        .pipe(server.stream());
-});
-
-//запуск сервера
-gulp.task("serve", function() {
-    server.init({
-        server: "build"
-    });
-
-    //вотчеры
-    gulp.watch(path.src.jsbabel, ["babel"]);
-    gulp.watch(path.src.js, ["js"]);
-    gulp.watch(path.src.styles, ["style"]);
-    gulp.watch('*.html', ['html']);
-    gulp.watch('*.php', ['php']);
-
 });
 
 
@@ -136,17 +102,38 @@ gulp.task("clean", function() {
     return del("build");
 });
 
-//запуск билда
+//----------конец ТАСКОВ
+
+//---------gulp (serve, build)
+
+//собрать сборку для прода
 gulp.task("build", function(fn) {
     runSequence(
         "clean",
         "copy",
-        "image",
         "style",
         "html",
-        "babel",
-        "php",
+        "image",
         "js",
         fn
     );
+});
+
+//запуск сервера
+gulp.task("serve", function () {
+    server.init({
+        server: "build"
+    });
+    runSequence(
+        "clean",
+        "copy",
+        "style",
+        "html",
+        "js");
+
+    //вотчеры
+    gulp.watch(path.src.js, ["js"]);
+    gulp.watch(path.src.styles, ["style"]);
+    gulp.watch('*.html', ['html']);
+
 });
